@@ -1,0 +1,4 @@
+name: "name_of_the_cam"
+address: "http://user:pass@xxx.xxx.xxx.xxxx:port/video/mjpg.cgi"
+frames_per_minute: 30
+store_path: "C:\local_folder\extra_folder"

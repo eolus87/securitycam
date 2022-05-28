@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Dec  1 23:04:58 2019
+# Personal project
+__author__ = "Eolus"
 
-@author: Eolus
-"""
-#%% Needed Libraries
+# Standard libraries
 import cv2
-#from skimage.metrics import structural_similarity as ssim
-from skimage.measure import compare_ssim as ssim
+from skimage.metrics import structural_similarity as ssim
 import time
 import os
 import datetime
 import numpy as np
+# Third party libraries
+# Custom libraries
 
 #%% Parameters
 path_1      = "E:\\OneDrive\\camsurveillance\\laptop\\"
