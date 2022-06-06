@@ -5,6 +5,7 @@ __author__ = "Eolus"
 import datetime
 import cv2
 import time
+import queue
 from typing import Tuple
 # Third party libraries
 # Custom libraries
@@ -13,7 +14,8 @@ from camera.frame import Frame
 
 class CameraHandlerVideo:
     def __init__(self, camera_address: str, camera_name: str,
-                 frames_per_minute: int, display_image: bool = False) -> None:
+                 frames_per_minute: int, display_image: bool = False, 
+                 queue_object: queue.Queue = None) -> None:
         # Camera details
         self.camera_address = camera_address
         self.camera_name = camera_name
@@ -29,6 +31,7 @@ class CameraHandlerVideo:
         # State variables
         self.keep_running = True
         self.last_frame_time = datetime.datetime.now()
+        self.queue_object = queue_object
 
         # Queue object
 
@@ -57,7 +60,8 @@ class CameraHandlerVideo:
                             if key == self.key_to_stop:
                                 self.keep_running = False
                         
-                        # TODO: PLACEHOLDER FOR THE FRAME TO GET INTO THE QUEUE
+                        if self.queue_object is not None:
+                            self.queue_object.put(f1)
                     
                     else:
                         # The frame is not wanted yet
