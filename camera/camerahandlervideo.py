@@ -61,7 +61,8 @@ class CameraHandlerVideo:
                                 self.keep_running = False
                         
                         if self.queue_object is not None:
-                            self.queue_object.put(f1)
+                            new_frame = Frame(f1, self.camera_name)
+                            self.queue_object.put(new_frame)
                     
                     else:
                         # The frame is not wanted yet
