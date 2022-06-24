@@ -9,7 +9,7 @@ import queue
 from typing import Tuple
 # Third party libraries
 # Custom libraries
-from camera.frame import Frame
+from data_classes.frame import Frame
 
 
 class CameraHandlerVideo:
@@ -32,8 +32,10 @@ class CameraHandlerVideo:
         self.keep_running = True
         self.last_frame_time = datetime.datetime.now()
         self.queue_object = queue_object
+        self.customer_list = []
 
-        # Queue object
+    def add_customer(self, customer):
+        self.customer_list.append(customer)
 
     def run(self) -> None:
         while self.keep_running:
@@ -62,8 +64,10 @@ class CameraHandlerVideo:
                         
                         if self.queue_object is not None:
                             new_frame = Frame(f1, self.camera_name)
-                            self.queue_object.put(new_frame)
-                    
+                            if self.queue_object is not None:
+                                self.queue_object.put(new_frame)
+                            for customer in self.customer_list:
+                                customer.notify(new_frame)
                     else:
                         # The frame is not wanted yet
                         time.sleep(0.02)

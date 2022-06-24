@@ -8,7 +8,6 @@ import time
 from typing import Tuple
 # Third party libraries
 # Custom libraries
-from camera.frame import Frame
 
 
 class CameraHandler:

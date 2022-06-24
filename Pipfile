@@ -9,6 +9,7 @@ opencv-python = "*"
 scikit-image = "*"
 spyder-kernels = "==2.2.*"
 pyyaml = "*"
+watchdog = "*"
 
 [dev-packages]
 

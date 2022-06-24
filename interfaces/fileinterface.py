@@ -7,7 +7,7 @@ import datetime
 import cv2
 # Third party libraries
 # Custom libraries
-from camera.frame import Frame
+from data_classes.frame import Frame
 
 
 class FileInterface:
@@ -33,3 +33,6 @@ class FileInterface:
         else:
             # Nothing to do if it is not the camera name in the init
             pass
+
+    def notify(self, frame: Frame) -> None:
+        self.store(frame)
