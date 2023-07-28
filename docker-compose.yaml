@@ -1,14 +1,14 @@
 services:
   housedashboard:
-    container_name: housedashboard_container
-    image: house_dashboard:v0.2
+    container_name: securitycam_container
+    image: securitycams:v0.2
     restart: always
     ports:
       - "8069:8069"
     volumes:
       - type: bind
-        source: /home/nico/sambashare/housedashboard/logs
+        source: /home/nico/sambashare/securitycam/logs
         target: /usr/src/app/logs
       - type: bind
-        source: /home/nico/sambashare/housedashboard/config
+        source: /home/nico/sambashare/securitycam/config
         target: /usr/src/app/config
