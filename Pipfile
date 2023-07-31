@@ -7,7 +7,7 @@ name = "pypi"
 numpy = "*"
 opencv-python = "*"
 scikit-image = "*"
-spyder-kernels = "==2.2.*"
+spyder-kernels = "==2.4.*"
 pyyaml = "*"
 watchdog = "*"
 
