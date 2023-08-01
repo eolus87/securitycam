@@ -57,7 +57,8 @@ class Orchestrator:
         # Leave time to the threads to stop
         time.sleep(1)
 
-    def launch_camera(self, camera_change: CameraConfChange) -> CameraConfChange:
+    @staticmethod
+    def launch_camera(camera_change: CameraConfChange) -> CameraConfChange:
         # %% Initialization and configuration
         pictures_queue = queue.Queue()
 
