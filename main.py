@@ -21,12 +21,12 @@ conf_path = os.path.join(conf_base_path, conf_filename)
 camera_conf = CameraConf(conf_path)
 
 filevideostream = FileVideoStream(camera_conf)
-motiondetector = MotionDetector()
-peopledetector = PeopleDetector()
+motiondetector = MotionDetector(camera_conf)
+peopledetector = PeopleDetector(camera_conf)
 fileinterface = FileInterface(camera_conf)
 filevideostream.start()
 
-init_logger(camera_conf.name)
+init_logger(camera_conf.generic_conf.name)
 
 while True:
     tic = time.time()

@@ -27,10 +27,10 @@ class FileVideoStream:
         self.logger = logging.getLogger(f"securitycam.{__name__}")
         self.stopped = False
         self.queue = Queue(maxsize=queue_size)
-        self.camera_name = camera_conf.name
+        self.camera_name = camera_conf.generic_conf.name
 
         self.logger.debug("Instantiating camera object.")
-        self.stream = cv2.VideoCapture(camera_conf.address)
+        self.stream = cv2.VideoCapture(camera_conf.generic_conf.address)
 
     def start(self) -> None:
         """Starts the thread."""

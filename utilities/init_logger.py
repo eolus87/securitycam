@@ -9,6 +9,11 @@ from logging.handlers import TimedRotatingFileHandler
 
 
 def init_logger(log_file_name: str) -> logging.Logger:
+    """Initializes the logger.
+
+    :param log_file_name: String with the name of the log file.
+    :return: Logger object.
+    """
     # Instantiation of the logger
     logger = logging.getLogger("securitycam")
     logger.setLevel(logging.DEBUG)
@@ -31,7 +36,8 @@ def init_logger(log_file_name: str) -> logging.Logger:
     file_handler.setLevel(logging.DEBUG)
 
     # Logging format
-    formatter = logging.Formatter("%(asctime)s: %(levelname)s - %(message)s [%(threadName)s]")
+    formatter = logging.Formatter("%(asctime)s: %(levelname)s - "
+                                  "%(message)s [%(threadName)s]")
     screen_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
 

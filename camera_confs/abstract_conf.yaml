@@ -1,4 +1,12 @@
-name: "name_of_the_cam"
-address: "http://user:pass@xxx.xxx.xxx.xxxx:port/video/mjpg.cgi"
-frames_per_minute: 30
-store_path: "C:\local_folder\extra_folder"
+generic:
+  name: "name_of_the_cam"
+  address: "rtsp://user:pass@XXX.XXX.XXX.XXX/video.mp4"
+  store_path: "C:\local_folder\extra_folder"
+
+motion_detector:
+  contour_min_area: 500
+  threshold_value: 35
+
+people_detector:
+  confidence_threshold: 0.8
+  iou_threshold: 0.45

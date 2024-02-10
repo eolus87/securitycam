@@ -6,21 +6,35 @@ import logging
 import torch
 # Custom libraries
 from data_classes.frame import Frame
+from data_classes.cameraconf import CameraConf
 
-CONFIDENCE_THRESHOLD = 0.8  # confidence threshold (0-1)
-IOU_THRESHOLD = 0.45  # NMS IoU threshold (0-1)
-CLASSES = [0]  # (optional list) filter by class, i.e. = [0, 15, 16] for persons, cats and dogs
+# (optional list) filter by class, i.e. = [0, 15, 16] for persons, cats and dogs
+CLASSES = [0]
 
 
 class PeopleDetector:
-    def __init__(self) -> None:
+    """This class has been developed using the code in the following website:
+    https://news.machinelearning.sg/posts/object_detection_with_yolov5/
+    Credits to Eugene."""
+    def __init__(self, camera_conf: CameraConf) -> None:
+        """Initializes the class.
+
+        :param camera_conf: CameraConf object with the camera configuration.
+        """
         self.logger = logging.getLogger(f"securitycam.{__name__}")
+
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-        self.model.conf = CONFIDENCE_THRESHOLD
-        self.model.iou = IOU_THRESHOLD
+        self.model.conf = camera_conf.people_detector_conf.confidence_threshold
+        self.model.iou = camera_conf.people_detector_conf.iou_threshold
         self.model.classes = CLASSES
 
     def detect_people(self, frame: Frame) -> (bool, Frame):
+        """Detects people in the frame.
+
+        :param frame: Frame object with the frame to analyze.
+        :return: Tuple with a boolean indicating if people were detected
+        and a Frame object with the detection.
+        """
         # Calculation
         results = self.model(frame.values)
 

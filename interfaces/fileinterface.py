@@ -1,4 +1,4 @@
-__author__ = "Nicolas Gutierrez"
+__author__ = "Eolus"
 
 # Standard libraries
 import os
@@ -11,12 +11,22 @@ from data_classes.frame import Frame
 
 
 class FileInterface:
+    """This class is used to store the frames in the file system."""
     def __init__(self, camera_conf: CameraConf) -> None:
-        self.camera_name = camera_conf.name
-        self.storing_path = os.path.normpath(camera_conf.store_path)
+        """Initializes the class.
+
+        :param camera_conf: CameraConf object with the camera configuration.
+        """
+        self.camera_name = camera_conf.generic_conf.name
+        self.storing_path = os.path.normpath(camera_conf.generic_conf.store_path)
         self.file_extension = ".png"
 
     def store(self, frame: Frame, extra_details: str = "") -> None:
+        """Stores the frame in the file system.
+
+        :param frame: Frame object with the frame to store.
+        :param extra_details: String with additional details to add to the file name.
+        """
         # Naming
         datetime_now = datetime.datetime.now().strftime("%y%m%d_%H%M%S-%f")
         date_now = datetime_now.split("_")[0]

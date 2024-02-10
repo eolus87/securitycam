@@ -22,10 +22,11 @@ class Frame:
     color_bands: int = field(init=False, repr=True)
 
     def __post_init__(self):
+        """Initializes the class."""
         # Time stamp
         self.time_stamp = datetime.datetime.now()
         self.time_stamp_str = self.time_stamp.strftime("%y%m%d_%H%M%S")
 
         # Picture properties
-        self.vertical_resolution, self.horizontal_resolution, self.color_bands = self.values.shape
-
+        self.vertical_resolution, self.horizontal_resolution, self.color_bands = \
+            self.values.shape
