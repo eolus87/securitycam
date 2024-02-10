@@ -13,7 +13,6 @@ import typing
 class CameraConf:
     name: str = field(init=False, repr=True, default="")
     address: str = field(init=False, repr=True, default="")
-    frames_per_minute: int = field(init=False, repr=True, default=1)
     store_path: str = field(init=False, repr=True, default="")
 
     def __init__(self, conf_path: str):
@@ -22,7 +21,6 @@ class CameraConf:
 
         self.name = camera_conf['name']
         self.address = camera_conf['address']
-        self.frames_per_minute = camera_conf['frames_per_minute']
         self.store_path = camera_conf['store_path']
 
         self.__type_check()

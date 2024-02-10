@@ -8,9 +8,8 @@ numpy = "*"
 opencv-python = "*"
 scikit-image = "*"
 pyyaml = "*"
-onedrivesdk = "~=1.1"
-requests-oauthlib = "*"
-oauthlib = "*"
+torch = "*"
+pandas = "*"
 
 [dev-packages]
 

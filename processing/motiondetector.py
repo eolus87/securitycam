@@ -1,24 +1,24 @@
-__author__ = "Nicolas Gutierrez"
-
+__author__ = "Eolus"
 
 # Standard libraries
 import logging
 # Third party libraries
 import cv2
 # Custom libraries
+from data_classes.frame import Frame
 
 CONTOUR_AREA_THRESHOLD = 500
 THRESHOLD_VALUE = 35
 
 
 class MotionDetector:
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(f"securitycam.{__name__}")
         self.previous_frame = None
 
-    def detect_motion(self, frame):
+    def detect_motion(self, frame: Frame) -> (bool, Frame):
         motion_detected = False
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(frame.values, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
         if self.previous_frame is None:
@@ -36,10 +36,10 @@ class MotionDetector:
             for contour in contours:
                 if cv2.contourArea(contour) > CONTOUR_AREA_THRESHOLD:
                     (x, y, w, h) = cv2.boundingRect(contour)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    cv2.rectangle(frame.values, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     self.logger.info("Motion detected")
                     motion_detected = True
 
             self.previous_frame = gray
 
-        return motion_detected, frame
+        return motion_detected, Frame(frame.values, frame.cam_name)
