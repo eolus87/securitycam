@@ -1,4 +1,3 @@
-# Personal project
 __author__ = "Eolus"
 
 # Standard libraries

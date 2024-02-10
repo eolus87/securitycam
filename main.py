@@ -1,72 +1,38 @@
-# Personal project
 __author__ = "Eolus"
 
 # Standard libraries
+import os
 import time
-import cv2
-import threading
 # Third party libraries
+import cv2
 # Custom libraries
-from processing import detectiononSSIM
+from camera.filevideostream import FileVideoStream
+from data_classes.cameraconf import CameraConf
+from processing.motiondetector import MotionDetector
+from interfaces.fileinterface import FileInterface
+from data_classes.frame import Frame
+from utilities.init_logger import init_logger
 
-windowname = "IPcam"
-captureobjectpath = 'http://admin:1234@192.168.0.79:80/video/mjpg.cgi'
-storingpath = "E:\\OneDrive\\camsurveillance\\Dlink\\"
-imgcounter = 60
+# conf_file_pattern = r'^_[A-Za-z\d_ ]*.yaml$'
 
-windowname_2 = "Laptop"
-captureobjectpath_2 = 0
-storingpath_2 = "E:\\OneDrive\\camsurveillance\\laptop\\"
-imgcounter_2 = 60
+# Configuration
+conf_base_path = r"camera_confs"
+conf_filename = "_ipcam_1.yaml"
+conf_path = os.path.join(conf_base_path, conf_filename)
+camera_conf = CameraConf(conf_path)
 
+filevideostream = FileVideoStream(camera_conf.address)
+motiondetector = MotionDetector()
+fileinterface = FileInterface(camera_conf.name, camera_conf.store_path)
+filevideostream.start()
 
-def continuousmonitoring(cameraobject, windowname, intervaltime, saveeveryn, threshold):
-    i = 0
-#    threshold = 0.996
-    while True:
-        # Check the key to break the loop
-        key = cv2.waitKey(20)
-        if key == 27:  # exit on ESC
-            cv2.destroyWindow(windowname)
-            break
-        
-        # Flag to save a picture 
-        i = i+1
-#        print(i)
-        if i > saveeveryn:
-            cameraobject.takeandsavepicture()
-            i = 0   
-        
-        cameraobject.detection(threshold)
-        
-        time.sleep(intervaltime)
+init_logger(camera_conf.name)
 
-
-
-camera = detectiononSSIM.detectiononSSIM(captureobjectpath,
-                                         storingpath,
-                                         imgcounter,
-                                         windowname)
-
-# camera2 = detectiononSSIM.detectiononSSIM(captureobjectpath_2,
-#                                          storingpath_2,
-#                                          imgcounter_2,
-#                                          windowname_2)
-
-
-#continuousmonitoring(camera,windowname,0.5,10)
-
-x = threading.Thread(target=continuousmonitoring, args=(camera, windowname, 0.5, 600, 0.996))
-x.start()
-
-# x2 = threading.Thread(target=continuousmonitoring, args=(camera2, windowname_2, 0.5, 600, 0.95))
-# x2.start()
-
-#while True:
-#    # Check the key to break the loop
-#    key = cv2.waitKey(20)
-#    if key == 27: # exit on ESC
-#        x.join()
-#        x2.join()
-#        break
-#    time.sleep(0.5)
+while True:
+    tic = time.time()
+    frame = filevideostream.read()
+    motion_detected, frame_with_detection = motiondetector.detect_motion(frame)
+    if motion_detected:
+        fileinterface.notify(Frame(frame_with_detection, camera_conf.name))
+    toc = time.time() - tic
+    print(f"Frame time {toc:.2f} s")

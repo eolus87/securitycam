@@ -1,4 +1,3 @@
-# Personal project
 __author__ = "Eolus"
 
 # Standard libraries
@@ -17,7 +16,7 @@ class CameraConf:
     frames_per_minute: int = field(init=False, repr=True, default=1)
     store_path: str = field(init=False, repr=True, default="")
 
-    def read_from_file(self, conf_path: str):
+    def __init__(self, conf_path: str):
         with open(os.path.normpath(conf_path)) as f:
             camera_conf = yaml.load(f, Loader=yaml.FullLoader)
 

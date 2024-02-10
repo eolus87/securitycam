@@ -1,5 +1,4 @@
-# Personal project
-__author__ = "Eolus"
+__author__ = "Nicolas Gutierrez"
 
 # Standard libraries
 import os

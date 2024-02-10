@@ -7,9 +7,10 @@ name = "pypi"
 numpy = "*"
 opencv-python = "*"
 scikit-image = "*"
-spyder-kernels = "==2.4.*"
 pyyaml = "*"
-watchdog = "*"
+onedrivesdk = "~=1.1"
+requests-oauthlib = "*"
+oauthlib = "*"
 
 [dev-packages]
 
