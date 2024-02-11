@@ -1,81 +1,76 @@
-# Personal project
 __author__ = "Eolus"
 
 # Standard libraries
-import os
-import queue
 import time
-import yaml
-import threading
 # Third party libraries
+import numpy as np
 # Custom libraries
-from workflow.changewatcher import ChangeWatcher
-from data_classes.cameraconfchangeenum import CameraConfChangeEnum
-from data_classes.cameraconfchange import CameraConfChange
-from camera.camerahandlervideo import CameraHandlerVideo
+from camera.filevideostream import FileVideoStream
+from data_classes.cameraconf import CameraConf
+from processing.motiondetector import MotionDetector
 from interfaces.fileinterface import FileInterface
+from utilities.init_logger import init_logger
+from processing.peopledetector import PeopleDetector
 
 
 class Orchestrator:
-    """
-    The orchestrator objective is controlling the workflow of the
-    code.
-    """
+    """This class is used to orchestrate the different services."""
+    def initialization(self, camera_conf: CameraConf) -> None:
+        """Initializes the class.
 
-    def __init__(self, change_watcher: ChangeWatcher, changes_queue: queue.Queue) -> None:
-        # Folder and file type to monitor
-        self.change_watcher = change_watcher
-        self.changes_queue = changes_queue
+        :param camera_conf: CameraConf object with the camera configuration.
+        """
+        # Initialization of logger
+        self.__logger = init_logger(camera_conf.generic_conf.name)
 
-        self.camera_handlers = []
+        # Initialization of services
+        self.__file_video_stream = FileVideoStream(camera_conf)
 
-    def check_queue(self) -> None:
-        camera_change = self.changes_queue.get()
-        if camera_change is not None:
-            if camera_change.action == CameraConfChangeEnum.NEW:
-                print("Starting a new camera")
-                camera_change = self.launch_camera(camera_change)
-                self.camera_handlers.append(camera_change)
-            elif camera_change.action == CameraConfChangeEnum.DELETED:
-                print("Removing a camera")
-                camera_handlers_confs = [x.conf_path for x in self.camera_handlers]
-                index_to_remove = camera_handlers_confs.index(camera_change.conf_path)
-                self.camera_handlers[index_to_remove].camera_handler.keep_running = False
-                time.sleep(2)
-                del self.camera_handlers[index_to_remove]
-            else:
-                print("Undefined action")
+        self.__motion_detector = MotionDetector(camera_conf)
+        self.__people_detector = PeopleDetector(camera_conf)
 
-    def close_and_clean(self) -> None:
-        # Stop the filewatcher
-        self.change_watcher.stop()
+        self.__file_interface = FileInterface(camera_conf)
 
-        # Stop the cameras
-        for camera in self.camera_handlers:
-            camera.camera_handler.keep_running = False
+        # Other variables
+        self.__keep_running = True
+        self.__camera_name = camera_conf.generic_conf.name
 
-        # Leave time to the threads to stop
-        time.sleep(1)
+    def start(self, camera_conf: CameraConf, shared_dict: dict) -> None:
+        """Starts the flow of the camera.
+        This method starts the video stream and the different services.
+        """
+        self.initialization(camera_conf)
 
-    @staticmethod
-    def launch_camera(camera_change: CameraConfChange) -> CameraConfChange:
-        # %% Initialization and configuration
-        pictures_queue = queue.Queue()
+        self.__file_video_stream.start()
 
-        with open(os.path.join(camera_change.conf_path)) as f:
-            camera_details_1 = yaml.load(f, Loader=yaml.FullLoader)
+        while self.__keep_running:
+            tic = time.time()
+            frame_object = self.__file_video_stream.read()
+            cam_name = frame_object.cam_name
+            frame_values = np.copy(frame_object.values)
+            shared_dict[cam_name] = frame_values
 
-        # %% Initialization of classes
+            motion_detected, frame_with_detection = \
+                self.__motion_detector.detect_motion(frame_object)
+            people_detected, frame_with_people_detection = \
+                self.__people_detector.detect_people(frame_object)
+            if motion_detected:
+                self.__file_interface.store(frame_with_detection, "motion")
+            if people_detected:
+                self.__file_interface.store(frame_with_people_detection, "people")
 
-        camera_handler_1 = CameraHandlerVideo(camera_details_1['address'],
-                                              camera_details_1['name'],
-                                              camera_details_1['frames_per_minute'],
-                                              True, pictures_queue)
-        picture_file_interface_1 = FileInterface(camera_details_1['name'],
-                                                 camera_details_1['store_path'])
-        camera_handler_1.add_customer(picture_file_interface_1)
-        # %% Thread creation and While Loop
-        camera_change.camera_handler = camera_handler_1
-        threading.Thread(target=camera_handler_1.run, daemon=True).start()
+            toc = time.time() - tic
+            print(f"{self.__camera_name}: Frame time {toc:.2f} s")
 
-        return camera_change
+    def stop(self, time_out: int = 1) -> None:
+        """Stops the flow of the camera.
+        This method stops the video stream and the different services.
+
+        :param time_out: Time to wait before exiting the flow.
+        """
+        self.__file_video_stream.stop()
+        self.__keep_running = False
+        time.sleep(time_out)
+        self.__logger.info(f"Exiting the flow of camera: {self.__camera_name}.")
+
+

@@ -3,39 +3,66 @@ __author__ = "Eolus"
 # Standard libraries
 import os
 import time
+import glob
+from multiprocessing import Process, Manager
 # Third party libraries
+import cv2
 # Custom libraries
-from camera.filevideostream import FileVideoStream
 from data_classes.cameraconf import CameraConf
-from processing.motiondetector import MotionDetector
-from interfaces.fileinterface import FileInterface
-from utilities.init_logger import init_logger
-from processing.peopledetector import PeopleDetector
+from workflow.orchestrator import Orchestrator
 
-# conf_file_pattern = r'^_[A-Za-z\d_ ]*.yaml$'
+# Constants
+DEBUGGING = True
+CONFIGURATION_PATH = "camera_confs"
+CONFIGURATION_FORMAT = "yaml"
+TIME_BETWEEN_PROCESS_INITILIZATION = 1  # s
+TIME_BETWEEN_PROCESS_START = 1  # s
 
-# Configuration
-conf_base_path = r"camera_confs"
-conf_filename = "_ipcam_1.yaml"
-conf_path = os.path.join(conf_base_path, conf_filename)
-camera_conf = CameraConf(conf_path)
+print("Working with camera configurations")
+list_of_configurations = glob.glob(
+    os.path.join(CONFIGURATION_PATH,
+                 f"*.{CONFIGURATION_FORMAT}"
+                 )
+    )
+list_of_configuration_objects = []
+for conf_path in list_of_configurations:
+    try:
+        list_of_configuration_objects.append(CameraConf(conf_path))
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-filevideostream = FileVideoStream(camera_conf)
-motiondetector = MotionDetector(camera_conf)
-peopledetector = PeopleDetector(camera_conf)
-fileinterface = FileInterface(camera_conf)
-filevideostream.start()
+print("Starting the orchestrators")
+list_of_processes = []
+try:
+    with Manager() as manager:
+        shared_dict = manager.dict()
+        print("Launching the processes.")
+        for conf_object in list_of_configuration_objects:
+            p = Process(target=Orchestrator().start, args=(conf_object, shared_dict,))
+            p.start()
+            list_of_processes.append(p)
+            time.sleep(TIME_BETWEEN_PROCESS_START)
 
-init_logger(camera_conf.generic_conf.name)
+        print("Starting the visualization.")
+        while True:
+            if DEBUGGING:
+                for conf_object in list_of_configuration_objects:
+                    try:
+                        frame = shared_dict[conf_object.generic_conf.name]
+                        if frame is not None:
+                            cv2.imshow(conf_object.generic_conf.name, frame)
+                            if cv2.waitKey(1) & 0xFF == ord('q'):
+                                break
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
 
-while True:
-    tic = time.time()
-    frame = filevideostream.read()
-    motion_detected, frame_with_detection = motiondetector.detect_motion(frame)
-    people_detected, frame_with_people_detection = peopledetector.detect_people(frame)
-    if motion_detected:
-        fileinterface.store(frame_with_detection, "motion")
-    if people_detected:
-        fileinterface.store(frame_with_people_detection, "people")
-    toc = time.time() - tic
-    print(f"Frame time {toc:.2f} s")
+            time.sleep(0.15)
+
+except Exception as e:
+    print(f"An error occurred: {e}")
+
+finally:
+    if DEBUGGING:
+        cv2.destroyAllWindows()
+    for p in list_of_processes:
+        p.join()
