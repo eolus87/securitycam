@@ -1,7 +1,7 @@
 generic:
   name: "name_of_the_cam"
-  address: "rtsp://user:pass@XXX.XXX.XXX.XXX/video.mp4"
-  store_path: "C:\local_folder\extra_folder"
+  address: "rtsp://user:pass@123.123.123.123/video.mp4"
+  store_path: "pictures"
 
 motion_detector:
   contour_min_area: 500
