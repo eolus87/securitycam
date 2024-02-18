@@ -29,7 +29,7 @@ def init_logger(log_file_name: str) -> logging.Logger:
     # File Handler
     os.makedirs("logs", exist_ok=True)
     file_handler = TimedRotatingFileHandler(
-        os.path.join("logs", log_file_name),
+        os.path.join("logs", log_file_name + ".log"),
         when='D',
         interval=7
     )
