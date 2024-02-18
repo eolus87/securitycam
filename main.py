@@ -1,72 +1,74 @@
-# Personal project
 __author__ = "Eolus"
 
 # Standard libraries
+import os
 import time
-import cv2
-import threading
+import glob
+from multiprocessing import Process, Manager
 # Third party libraries
+import cv2
 # Custom libraries
-from processing import detectiononSSIM
+from data_classes.cameraconf import CameraConf
+from workflow.orchestrator import Orchestrator
 
-windowname = "IPcam"
-captureobjectpath = 'http://admin:1234@192.168.0.79:80/video/mjpg.cgi'
-storingpath = "E:\\OneDrive\\camsurveillance\\Dlink\\"
-imgcounter = 60
+# Constants
+DEBUGGING = True
+CONFIGURATION_PATH = "camera_confs"
+CONFIGURATION_FORMAT = "yaml"
+TIME_BETWEEN_PROCESS_INITILIZATION = 1  # s
+TIME_BETWEEN_PROCESS_START = 1  # s
 
-windowname_2 = "Laptop"
-captureobjectpath_2 = 0
-storingpath_2 = "E:\\OneDrive\\camsurveillance\\laptop\\"
-imgcounter_2 = 60
+print("Working with camera configurations")
+list_of_configurations = glob.glob(
+    os.path.join(CONFIGURATION_PATH,
+                 f"*.{CONFIGURATION_FORMAT}"
+                 )
+    )
+list_of_configuration_objects = []
+for conf_path in list_of_configurations:
+    try:
+        list_of_configuration_objects.append(CameraConf(conf_path))
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
+print("Starting the orchestrators")
+list_of_processes = []
+list_of_orchestrators = []
+try:
+    with Manager() as manager:
+        shared_dict = manager.dict()
+        print("Launching the processes.")
+        for conf_object in list_of_configuration_objects:
+            list_of_orchestrators.append(Orchestrator())
+            p = Process(target=list_of_orchestrators[-1].start, args=(conf_object, shared_dict,))
+            p.daemon = True
+            p.start()
+            list_of_processes.append(p)
+            time.sleep(TIME_BETWEEN_PROCESS_START)
 
-def continuousmonitoring(cameraobject, windowname, intervaltime, saveeveryn, threshold):
-    i = 0
-#    threshold = 0.996
-    while True:
-        # Check the key to break the loop
-        key = cv2.waitKey(20)
-        if key == 27:  # exit on ESC
-            cv2.destroyWindow(windowname)
-            break
-        
-        # Flag to save a picture 
-        i = i+1
-#        print(i)
-        if i > saveeveryn:
-            cameraobject.takeandsavepicture()
-            i = 0   
-        
-        cameraobject.detection(threshold)
-        
-        time.sleep(intervaltime)
+        print("Starting the visualization.")
+        while True:
+            if DEBUGGING:
+                for conf_object in list_of_configuration_objects:
+                    try:
+                        frame = shared_dict[conf_object.generic_conf.name]
+                        if frame is not None:
+                            cv2.imshow(conf_object.generic_conf.name, frame)
+                            if cv2.waitKey(1) & 0xFF == ord('q'):
+                                break
+                    except Exception as e:
+                        print(f"An error occurred while visualizing: {e}")
+                time.sleep(0.15)
+            else:
+                time.sleep(1)
 
+except Exception as e:
+    print(f"An error occurred while starting the orchestrators: {e}")
 
-
-camera = detectiononSSIM.detectiononSSIM(captureobjectpath,
-                                         storingpath,
-                                         imgcounter,
-                                         windowname)
-
-# camera2 = detectiononSSIM.detectiononSSIM(captureobjectpath_2,
-#                                          storingpath_2,
-#                                          imgcounter_2,
-#                                          windowname_2)
-
-
-#continuousmonitoring(camera,windowname,0.5,10)
-
-x = threading.Thread(target=continuousmonitoring, args=(camera, windowname, 0.5, 600, 0.996))
-x.start()
-
-# x2 = threading.Thread(target=continuousmonitoring, args=(camera2, windowname_2, 0.5, 600, 0.95))
-# x2.start()
-
-#while True:
-#    # Check the key to break the loop
-#    key = cv2.waitKey(20)
-#    if key == 27: # exit on ESC
-#        x.join()
-#        x2.join()
-#        break
-#    time.sleep(0.5)
+finally:
+    if DEBUGGING:
+        cv2.destroyAllWindows()
+    for i, p in enumerate(list_of_processes):
+        list_of_orchestrators[i].stop()
+        p.join()
+        p.close()
