@@ -3,8 +3,6 @@ services:
     container_name: securitycam_container
     image: securitycam:v1.0
     restart: always
-    ports:
-      - "8069:8069"
     volumes:
       - type: bind
         source: /home/nico/sambashare/securitycam/logs
