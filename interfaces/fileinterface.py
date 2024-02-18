@@ -26,6 +26,8 @@ class FileInterface:
 
         :param frame: Frame object with the frame to store.
         :param extra_details: String with additional details to add to the file name.
+        It can be used to mark the frames as a detection frame. i.e.
+        extra_details = "motion"
         """
         # Naming
         datetime_now = datetime.datetime.now().strftime("%y%m%d_%H%M%S-%f")
