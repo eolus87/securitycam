@@ -12,6 +12,6 @@ RUN dpkg-reconfigure -f noninteractive tzdata
 
 RUN apt-get update
 RUN pip install pipenv
-RUN pipenv install
+RUN pipenv sync
 
 ENTRYPOINT ["pipenv", "run", "python", "./main.py"]
