@@ -13,7 +13,7 @@ import numpy as np
 from data_classes.frame import Frame
 from data_classes.cameraconf import CameraConf
 
-CONNECTION_RETRY_DELAY = 20  # s
+RECONNECTION_RETRY_DELAY = 60  # s
 SLEEP_TIME_BETWEEN_FRAMES = 0.02  # s 30 fps = 0.0333, but time.sleep is not precise
 FRAME_QUEUE_SIZE = 128
 DUMMY_FRAME_WIDTH = 960
@@ -69,10 +69,10 @@ class FileVideoStream:
                     self.logger.warning("Queue full. Dropping frame.")
             else:
                 self.logger.info(f"Connection lost on {self.camera_name}. "
-                                 f"Retrying in {CONNECTION_RETRY_DELAY} seconds.")
+                                 f"Retrying in {RECONNECTION_RETRY_DELAY} seconds.")
                 self.stream.release()
                 self.stream = cv2.VideoCapture(self.camera_address)
-                time.sleep(CONNECTION_RETRY_DELAY)
+                time.sleep(RECONNECTION_RETRY_DELAY)
 
             time.sleep(SLEEP_TIME_BETWEEN_FRAMES)
 
