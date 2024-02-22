@@ -23,7 +23,7 @@ class PeopleDetector:
         """
         self.logger = logging.getLogger(f"securitycam.{__name__}")
 
-        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5n6', pretrained=True)
         self.model.conf = camera_conf.people_detector_conf.confidence_threshold
         self.model.iou = camera_conf.people_detector_conf.iou_threshold
         self.model.classes = CLASSES
