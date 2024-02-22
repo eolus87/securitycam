@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 numpy = "*"
-opencv-python = "*"
 scikit-image = "*"
 pyyaml = "*"
 torch = "*"
 pandas = "*"
+opencv-python-headless = "*"
 
 [dev-packages]
 
