@@ -86,8 +86,7 @@ class Orchestrator:
 
         :param time_out: Time to wait before exiting the flow.
         """
-        if self.__file_video_stream is not None:
-            self.__file_video_stream.stop()
+        self.__file_video_stream.stop()
         self.__keep_running = False
         time.sleep(time_out)
         self.__logger.info(f"Exiting the flow of camera: {self.__camera_name}.")

@@ -12,7 +12,7 @@ from data_classes.cameraconf import CameraConf
 from workflow.orchestrator import Orchestrator
 
 # Constants
-DEBUGGING = True
+DEBUGGING = False
 CONFIGURATION_PATH = "camera_confs"
 CONFIGURATION_FORMAT = "yaml"
 TIME_BETWEEN_PROCESS_INITILIZATION = 1  # s
