@@ -10,7 +10,7 @@ COPY . .
 RUN echo "Europe/London" > /etc/timezone
 RUN dpkg-reconfigure -f noninteractive tzdata
 
-RUN apt-get update
+RUN apt-get update && apt-get install -y libsm6 libxext6 libxrender-dev
 RUN pip install pipenv
 RUN pipenv sync
 
