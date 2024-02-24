@@ -12,8 +12,10 @@ torchvision = {file = "https://download.pytorch.org/whl/cpu/torchvision-0.10.0%2
 pandas = "*"
 opencv-python-headless = "*"
 requests = "*"
+flask = "*"
 
 [dev-packages]
+opencv-python = "*"
 
 [requires]
 python_version = "3.9"
